@@ -6,6 +6,7 @@ from tokens import token, mycol
 from commandss.mod import welcome as w
 from commandss.mod import mods as m
 from commandss import events as e
+
 # <----------------------------------Bot---------------------------------------->
 intents = discord.Intents.default()
 intents.message_content = True
@@ -15,14 +16,14 @@ intents.members = True
 def prefix(bot, message):
     result = mycol.find_one({"key": f"prefix_{message.guild.id}"})
     if result is not None:
-                ll = result["data"]
-                return ll
+        ll = result["data"]
+        return ll
     else:
-            ll = "t!"
-            return ll
+        ll = "t!"
+        return ll
 
 
-bot = commands.Bot(command_prefix=(prefix), case_insensitive=True, intents=intents, help_command=None)
+bot = commands.Bot(command_prefix=prefix, case_insensitive=True, intents=intents, help_command=None)
 
 
 @bot.event
