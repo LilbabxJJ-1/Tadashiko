@@ -6,7 +6,8 @@ from tokens import token, mycol
 from commandss.mod import welcome as w
 from commandss.mod import mods as m
 from commandss import events as e
-
+from commandss.fun import actions as a
+from commandss import general as g
 # <----------------------------------Bot---------------------------------------->
 intents = discord.Intents.default()
 intents.message_content = True
@@ -41,8 +42,13 @@ async def test(ctx):
         await ctx.send(find)
 
 
+
+
+
 def run():
     bot.add_cog(w.Welcome(bot))
+    bot.add_cog(a.Actions(bot))
+    bot.add_cog(g.Gen(bot))
     bot.add_cog(m.Mods(bot))
     bot.add_cog(e.Events(bot))
     bot.run(token)
