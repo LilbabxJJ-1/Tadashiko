@@ -77,7 +77,7 @@ class Welcome(commands.Cog):
                 await ctx.send(embed=warning)
         else:
             await ctx.send("You do not have permissions to do this!")
-            # FINISH HERE DUMMY
+           
 
     @welcome_color.error
     async def wc_error(self, ctx, error):
