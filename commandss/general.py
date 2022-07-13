@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 from tokens import mycol, warning
-from commandss.helps import Actionhelp
+from commandss.helps import Actionhelp, Funhelp, Confighelp, Utilhelp
 # <----------------------------------Bot---------------------------------------->
 
 
@@ -22,8 +22,27 @@ class DropDown(discord.ui.Select):
             prefix = ll["data"]
             Actionhelp.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/991779249004482600/8aab812fb41ade4e6c05686543a982c5.png")
             await interaction.response.send_message(f"Server Prefix: {prefix}", embed=Actionhelp, ephemeral=True)
-        else:
-            await interaction.response.send_message("Success")
+
+        elif self.values[0] == "Fun🎉":
+            ll = mycol.find_one({"key": f"prefix_{interaction.guild.id}"})
+            prefix = ll["data"]
+            Funhelp.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/991779249004482600/8aab812fb41ade4e6c05686543a982c5.png")
+            await interaction.response.send_message(f"Server Prefix: {prefix}", embed=Funhelp, ephemeral=True)
+
+        elif self.values[0] == "Utility⚙":
+            ll = mycol.find_one({"key": f"prefix_{interaction.guild.id}"})
+            prefix = ll["data"]
+            Utilhelp.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/991779249004482600/8aab812fb41ade4e6c05686543a982c5.png")
+            await interaction.response.send_message(f"Server Prefix: {prefix}", embed=Utilhelp, ephemeral=True)
+
+        elif self.values[0] == "Config⚒":
+            ll = mycol.find_one({"key": f"prefix_{interaction.guild.id}"})
+            prefix = ll["data"]
+            Confighelp.set_thumbnail(url=f"https://cdn.discordapp.com/avatars/991779249004482600/8aab812fb41ade4e6c05686543a982c5.png")
+            await interaction.response.send_message(f"Server Prefix: {prefix}", embed=Confighelp, ephemeral=True)
+
+
+
 
 class DropDownView(discord.ui.View):
     def __init__(self):

@@ -14,24 +14,24 @@ class Welcome(commands.Cog):
         self.bot = bot
 
     @commands.command(aliases=["welcome-channel", "wc"])
-    async def welcome_channel(self, ctx, chn: discord.TextChannel):
+    async def welcome_channel(self, ctx, channel: discord.TextChannel):
         if ctx.author.guild_permissions.manage_guild:
             if mycol.find_one({"key": f"accepted_{ctx.author.id}"}) is not None:
                 if mycol.find_one({'key': f"welcchan_{ctx.guild.id}"}) is not None:
                     q = {"key": f"welcchan_{ctx.guild.id}"}
-                    mycol.update_one(q, {"$set": {"data": f"{chn.id}"}})
+                    mycol.update_one(q, {"$set": {"data": f"{channel.id}"}})
                     embed = discord.Embed(title="Welcome Channel Updated!",
-                                          description=f"You have updated your welcome channel to <#{chn.id}>",
+                                          description=f"You have updated your welcome channel to <#{channel.id}>",
                                           color=0xffb6c1)
                     await ctx.send(embed=embed)
                 else:
                     server = {
                         "key": f"welcchan_{ctx.guild.id}",
-                        "data": f"{chn.id}"
+                        "data": f"{channel.id}"
                     }
                     mycol.insert_one(server)
                     embed = discord.Embed(title="Welcome Channel Updated!",
-                                          description=f"You have updated your welcome channel to <#{chn.id}>",
+                                          description=f"You have updated your welcome channel to <#{channel.id}>",
                                           color=0xffb6c1)
                     await ctx.send(embed=embed)
             else:
