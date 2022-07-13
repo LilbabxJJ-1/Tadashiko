@@ -1,6 +1,5 @@
 # <----------------------------------MainImports---------------------------------------->
 import asyncio
-
 import discord
 from discord.ext import commands
 from tokens import mycol, warning, perms
@@ -175,3 +174,8 @@ class Welcome(commands.Cog):
                 if footer is not None:
                     embed.set_footer(text=footer["data"])
                 await ctx.send(embed=embed)
+
+            else:
+                await ctx.send(warning)
+        else:
+            await ctx.send(perms)

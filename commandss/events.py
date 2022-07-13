@@ -9,7 +9,7 @@ class Events(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_member_join(self):
+    async def on_member_join(self, member):
         pass # For now
 
     @commands.Cog.listener()

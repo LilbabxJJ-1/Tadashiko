@@ -1,7 +1,7 @@
 # <----------------------------------MainImports---------------------------------------->
 import discord
 from discord.ext import commands
-from tokens import mycol, warning
+from tokens import mycol, warning, color
 # <----------------------------------Bot---------------------------------------->
 
 
@@ -11,6 +11,9 @@ class Utils(commands.Cog):
 
     @commands.command(aliases=["nick"])
     async def nickname(self, ctx, nick):
+        if mycol.find_one({"key": f"accepted_{ctx.author.id}"}) is None:
+            await ctx.send(warning)
+            return
         l = ["<", "@", "#", ">"]
         if PermissionError:
             await ctx.send("Cannot change Owners nickname")
@@ -36,3 +39,16 @@ class Utils(commands.Cog):
             await ctx.send("I don't have the perms to do this")
         else:
             print(error)
+
+    @commands.command(aliases=['botinfo', "btin"])
+    async def bit_info(self, ctx):
+        embed = discord.Embed(title="Bot Info", description="This is an embed", color=color)
+        embed.add_field(name="Creator", value=f"<@795540854147776572>", inline=True)
+        embed.add_field(name="Server Count", value=f"{len(self.bot.guilds)}", inline=True)
+        embed.add_field(name="Commands", value=f"{len(self.bot.commands)}", inline=True)
+        embed.add_field()
+        await ctx.send(embed=embed)
+
+    @bit_info.error
+    async def bi_error(self, ctx, error):
+        print(error)

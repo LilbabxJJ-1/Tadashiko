@@ -1,8 +1,11 @@
 # <----------------------------------MainImports---------------------------------------->
+import asyncio
+
 import discord
 from discord.ext import commands
+import discord.ui
 from tokens import mycol, warning
-from commandss.helps import Actionhelp, Funhelp, Confighelp, Utilhelp
+from commandss.helps import Actionhelp, Funhelp, Confighelp, Utilhelp, unverified
 # <----------------------------------Bot---------------------------------------->
 
 
@@ -67,8 +70,28 @@ class Gen(commands.Cog):
 
     @commands.Command
     async def help(self, ctx: discord.Interaction):
-        view = DropDownView()
-        await ctx.send("Choose a help menu!", view=view)
+        def check(msg):
+            if msg.author.id == ctx.author.id and ctx.channel.id == msg.channel.id:
+                return True
+        if mycol.find_one({"key": f"accepted_{ctx.author.id}"}) is None:
+            await ctx.send(embed=unverified)
+            try:
+               accept = await self.bot.wait_for("message", timeout=180, check=check)
+            except asyncio.TimeoutError:
+                await ctx.send(f"{ctx.author.mention} you ran out of time to accept the rules")
+                return
+            if accept.content.lower() == f"accept":
+                rules = {
+                    "key" : f"accepted_{ctx.author.id}",
+                    "data": "true"
+                }
+                mycol.insert_one(rules)
+                await ctx.send("Successfully accepted")
+            else:
+                await ctx.send(f"Please try again and send `accept`")
+        else:
+            view = DropDownView()
+            await ctx.send("Choose a help menu!", view=view)
 
 
 
