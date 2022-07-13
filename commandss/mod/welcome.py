@@ -3,10 +3,10 @@ import asyncio
 
 import discord
 from discord.ext import commands
-from tokens import mycol, warning
-
+from tokens import mycol, warning, perms
 
 # <----------------------------------Bot---------------------------------------->
+
 
 class Welcome(commands.Cog):
 
@@ -37,7 +37,7 @@ class Welcome(commands.Cog):
             else:
                 await ctx.send(embed=warning)
         else:
-            await ctx.send("You don't have the permissions to do this!")
+            await ctx.send(perms)
 
     @welcome_channel.error
     async def welcome_channel_error(self, ctx, error):
@@ -76,7 +76,7 @@ class Welcome(commands.Cog):
             else:
                 await ctx.send(embed=warning)
         else:
-            await ctx.send("You do not have permissions to do this!")
+            await ctx.send(perms)
            
 
     @welcome_color.error
@@ -121,7 +121,7 @@ class Welcome(commands.Cog):
                     q = {"key": f"welcFooter_{ctx.guild.id}"}
                     mycol.update_one(q, {"$set": {"data": f"{message}"}})
                     embed = discord.Embed(title="Successful!",
-                                          description="You have succesfully set the footer message",
+                                          description="You have successfully set the footer message",
                                           color=0xffb6c1)
                     await ctx.send(embed=embed)
 
@@ -150,19 +150,28 @@ class Welcome(commands.Cog):
                                           description="You have successfully set the footer message",
                                           color=0xffb6c1)
                     await ctx.send(embed=embed)
-
-
+            else:
+                await ctx.send(embed=warning)
+        else:
+            await ctx.send(perms)
+        # FINISH HERE
 
     @commands.command(aliases=["tw"])
     async def test_welcome(self, ctx):
         request = mycol.find_one({"key": f"welcColor_{ctx.guild.id}"})
-        request2 = mycol.find_one({"key": f"welcFooter_{ctx.guild.id}"})
+        title = mycol.find_one({"key": f"welcTitle_{ctx.guild.id}"})
+        footer = mycol.find_one({"key": f"welcFooter_{ctx.guild.id}"})
+        description = "Welcome {user.mention}!"
         color = await commands.ColorConverter().convert(ctx, request["data"])
         if ctx.author.guild_permissions.manage_guild:
             if mycol.find_one({"key": f"accepted_{ctx.author.id}"}) is not None:
-                embed = discord.Embed(title="Test",
-                                      description="Test",
+                if "{membercount}" in title:
+                    title = title.replace("{membercount}", str(ctx.guild.member_count))
+                if "{user.mention}" in description:
+                    description = description.replace("{user.mention}", self.bot.user.mention)
+                embed = discord.Embed(title=title,
+                                      description=description,
                                       color=color)
-                if request2 is not None:
-                    embed.set_footer(text=request2["data"])
+                if footer is not None:
+                    embed.set_footer(text=footer["data"])
                 await ctx.send(embed=embed)
