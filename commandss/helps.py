@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands
 from tokens import mycol, color
 
-
 unverified = discord.Embed(title="Rules and Conditions", description="""
 **:exclamation: Rules and Conditions agreement :exclamation:**
  
@@ -23,14 +22,15 @@ Actionhelp = discord.Embed(title="Action Page",
                            color=0xffb6c1)
 
 Funhelp = discord.Embed(title="Fun Page",
-                           description=f"***<Required>*** | ***[Optional]***\n**Commands:**\nUpdate Still in progress\n\n```FUN PLACEHOLDER```",
-                           color=0xffb6c1)
+                        description=f"***<Required>*** | ***[Optional]***\n**Commands:**\nUpdate Still in progress\n\n```FUN PLACEHOLDER```",
+                        color=0xffb6c1)
 
 Utilhelp = discord.Embed(title="Utilities Page",
-                           description=f"***<Required>*** | ***[Optional]***\n**Commands:**\nUpdate Still in progress\n\n```Nickname <new nick>```",
-                           color=0xffb6c1)
+                         description=f"***<Required>*** | ***[Optional]***\n**Commands:**\nUpdate Still in progress\n\n```Nickname <new nick>```",
+                         color=0xffb6c1)
 
-Confighelp = discord.Embed(title="Help Page",
-                           description=f"***<Required>*** | ***[Optional]***\n**Commands:**\nUpdate Still in progress\n\n```Prefix <new prefix>```",
+Confighelp = discord.Embed(title="Config Page",
+                           description=f"***<Required>*** | ***[Optional]***\n**Commands:**\n\n```Welcome-message\nWelcome-title\nWelcome-Image"
+                                       f"\nWelcome-footer\nWelcome-color\nWelcome-channel\nWelcome-enable/diable\nTest-welcome\nPrefix <new "
+                                       f"prefix>```",
                            color=0xffb6c1)
-
