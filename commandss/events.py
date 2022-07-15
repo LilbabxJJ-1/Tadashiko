@@ -16,10 +16,15 @@ class Events(commands.Cog):
         image = mycol.find_one({"key": f"welcImage_{ctx.guild.id}"})
         description = mycol.find_one({"key": f"welcMessage_{ctx.guild.id}"})
         if request is not None:
-            color = await commands.ColorConverter().convert(ctx, request["data"])
+            try:
+                colors = await commands.ColorConverter().convert(ctx, request["data"])
+            except commands.BadColourArgument:
+                colors = color
         else:
-            color = await commands.ColorConverter().convert(ctx, color)
+            colors = color
         channel = mycol.find_one({"key": f'welcchan_{ctx.guild.id}'})
+        if channel is None:
+            return
         channel = int(channel["data"])
         channel = self.bot.get_channel(channel)
         enabled = mycol.find_one({"key": f"welcEnabled_{ctx.guild.id}"})
@@ -29,10 +34,8 @@ class Events(commands.Cog):
             return
         else:
             if title is None:
-                await ctx.send("You need to set a title")
                 return
             if description is None:
-                await ctx.send("You need to set a description")
                 return
             if "{membercount}" in title["data"] or "{username}" in title["data"] or "{user.mention}" in title["data"] or "{servername}" in title[
                 "data"]:
@@ -49,7 +52,7 @@ class Events(commands.Cog):
                 description = description["data"]
             embed = discord.Embed(title=title,
                                   description=description,
-                                  color=color)
+                                  color=colors)
             if footer is not None:
                 footer = footer["data"].replace("{membercount}", str(ctx.guild.member_count)).replace("{username}", str(ctx.name)).replace(
                     "{user.mention}", str(ctx.mention)).replace("{servername}", str(ctx.guild.name))
@@ -57,6 +60,7 @@ class Events(commands.Cog):
             if image is not None:
                 embed.set_image(url=image["data"])
             await channel.send(embed=embed)
+            print(f"Welcome sent in {ctx.guild.name}")
 
     @commands.Cog.listener()
     async def on_message(self, message):

@@ -302,47 +302,58 @@ class Welcome(commands.Cog):
         else:
             await ctx.send(perms)
 
-    @commands.command(aliases=["tw"])
+    @commands.command(aliases=["tw", "test-welcome"])
     async def test_welcome(self, ctx):
-        request = mycol.find_one({"key": f"welcColor_{ctx.guild.id}"})
-        title = mycol.find_one({"key": f"welcTitle_{ctx.guild.id}"})
-        footer = mycol.find_one({"key": f"welcFooter_{ctx.guild.id}"})
-        image = mycol.find_one({"key": f"welcImage_{ctx.guild.id}"})
-        description = mycol.find_one({"key": f"welcMessage_{ctx.guild.id}"})
-        color = await commands.ColorConverter().convert(ctx, request["data"])
-        channel = mycol.find_one({"key": f'welcchan_{ctx.guild.id}'})
-        channel = int(channel["data"])
-        channel = self.bot.get_channel(channel)
         if ctx.author.guild_permissions.manage_guild:
+            request = mycol.find_one({"key": f"welcColor_{ctx.guild.id}"})
+            title = mycol.find_one({"key": f"welcTitle_{ctx.guild.id}"})
+            footer = mycol.find_one({"key": f"welcFooter_{ctx.guild.id}"})
+            image = mycol.find_one({"key": f"welcImage_{ctx.guild.id}"})
+            description = mycol.find_one({"key": f"welcMessage_{ctx.guild.id}"})
+            if request is not None:
+                try:
+                    colors = await commands.ColorConverter().convert(ctx, request["data"])
+                except commands.BadColourArgument:
+                    await ctx.send("Error: No color set, so default was used")
+                    colors = color
+            else:
+                await ctx.send("Error: No color set, so default was used")
+                colors = color
+            channel = mycol.find_one({"key": f'welcchan_{ctx.guild.id}'})
+            if channel is None:
+                await ctx.send("You need to set a welcome channel")
+                return
+            channel = int(channel["data"])
+            channel = self.bot.get_channel(channel)
             if mycol.find_one({"key": f"accepted_{ctx.author.id}"}) is not None:
-                if title is None:
-                    await ctx.send("You need to set a title")
-                    return
-                if description is None:
-                    await ctx.send("You need to set a description")
-                    return
-                if "{membercount}" in title["data"] or "{username}" in title["data"] or "{user.mention}" in title["data"] or "{servername}" in title["data"]:
-                    title = title["data"].replace("{membercount}", str(ctx.guild.member_count)).replace("{username}", str(ctx.author.name)).replace(
+                    if title is None:
+                        await ctx.send("You need to set a title")
+                        return
+                    if description is None:
+                        await ctx.send("You need to set a description")
+                        return
+                    if "{membercount}" in title["data"] or "{username}" in title["data"] or "{user.mention}" in title["data"] or "{servername}" in title["data"]:
+                        title = title["data"].replace("{membercount}", str(ctx.guild.member_count)).replace("{username}", str(ctx.author.name)).replace(
                         "{user.mention}", str(ctx.author.mention)).replace("{servername}", str(ctx.guild.name))
-                else:
-                    title = title["data"]
-                if "{membercount}" in description["data"] or "{username}" in description["data"] or "{user.mention}" in description["data"] or "{servername}" in description["data"]:
-                    description = description["data"].replace("{membercount}", str(ctx.guild.member_count)).replace("{username}",
+                    else:
+                        title = title["data"]
+                    if "{membercount}" in description["data"] or "{username}" in description["data"] or "{user.mention}" in description["data"] or "{servername}" in description["data"]:
+                        description = description["data"].replace("{membercount}", str(ctx.guild.member_count)).replace("{username}",
                                                                                                                     str(ctx.author.name)).replace(
                         "{user.mention}", str(ctx.author.mention)).replace("{servername}", str(ctx.guild.name))
-                else:
-                    description = description["data"]
-                embed = discord.Embed(title=title,
+                    else:
+                        description = description["data"]
+                    embed = discord.Embed(title=title,
                                       description=description,
-                                      color=color)
-                if footer is not None:
-                    footer = footer["data"].replace("{membercount}", str(ctx.guild.member_count)).replace("{username}", str(ctx.author.name)).replace(
+                                      color=colors)
+                    if footer is not None:
+                        footer = footer["data"].replace("{membercount}", str(ctx.guild.member_count)).replace("{username}", str(ctx.author.name)).replace(
                         "{user.mention}", str(ctx.author.mention)).replace("{servername}", str(ctx.guild.name))
-                    embed.set_footer(text=footer)
-                if image is not None:
-                    embed.set_image(url=image["data"])
-                await channel.send(embed=embed)
-                await ctx.send("Test Welcome has been sent")
+                        embed.set_footer(text=footer)
+                    if image is not None:
+                        embed.set_image(url=image["data"])
+                    await channel.send(embed=embed)
+                    await ctx.send("Test Welcome has been sent")
 
             else:
                 await ctx.send(warning)
