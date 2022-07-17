@@ -9,6 +9,8 @@ from commandss import events as e
 from commandss.fun import actions as a
 from commandss import general as g
 from commandss import utilities as u
+from commandss.fun import afk as af
+from commandss.fun import music as ms
 # <----------------------------------Bot---------------------------------------->
 intents = discord.Intents.default()
 intents.message_content = True
@@ -24,8 +26,9 @@ def prefix(bot, message):
         ll = "t!"
         return ll
 
+
 activity = discord.Activity(type=discord.ActivityType.watching, name='Myself be rebuilt 💮')
-bot = commands.Bot(command_prefix=prefix, case_insensitive=True, intents=intents, help_command=None, activity=activity)
+bot = commands.Bot(command_prefix=prefix, case_insensitive=True, intents=intents, help_command=None, activity=activity, chunk_guilds_at_startup=False)
 
 
 @bot.event
@@ -33,30 +36,6 @@ async def on_ready():
     print(f"Ready on {bot.user}")
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    for i in bot.get_cog("Welcome").walk_commands():
-        try:
-            if str(ctx.command.name) == str(i) or str(ctx.command.name) == "nickname":
-                return
-        except:
-            pass
-    try:
-        ll = ""
-        for i in ctx.command.clean_params:
-            ll += f"{i} "
-    except Exception:
-        pass
-        if isinstance(error, commands.MissingRequiredArgument):
-            embed = discord.Embed(title="Error!",
-                                  description=f"You are missing a required argument when using the `{ctx.command.name.title()}` command\nArguments "
-                                              f"are: `{ll}`",
-                                  color=0xff0000)
-            await ctx.send(embed=embed)
-        elif isinstance(error, commands.MemberNotFound):
-            await ctx.send("I cannot find that member!")
-        else:
-            print(error)
 
 
 
@@ -70,14 +49,16 @@ async def test(ctx):
         await ctx.send(find)
 
 
-def run():
+async def run():
+    await bot.wait_until_ready()
     bot.add_cog(w.Welcome(bot))
     bot.add_cog(a.Actions(bot))
     bot.add_cog(g.Gen(bot))
     bot.add_cog(m.Mods(bot))
     bot.add_cog(e.Events(bot))
     bot.add_cog(u.Utils(bot))
-    bot.run(token)
+    bot.add_cog(af.Fun(bot))
+    bot.add_cog(ms.Music(bot))
 
-
-run()
+bot.loop.create_task(run())
+bot.run(token)

@@ -12,7 +12,7 @@ unverified = discord.Embed(title="Rules and Conditions", description="""
   
   *Anyone found to be using Tadashiko for bad reasons or breaking any rules, will have their account banned from using commands*
   
-  Please use type \`accept\` to accept the rules and conditions for Tadashiko Bot:tm: then you can use my commands freely as you like!""",
+  Please use type `accept` to accept the rules and conditions for Tadashiko Bot:tm: then you can use my commands freely as you like!""",
                            color=color)
 
 Actionhelp = discord.Embed(title="Action Page",
@@ -34,3 +34,8 @@ Confighelp = discord.Embed(title="Config Page",
                                        f"\nWelcome-footer\nWelcome-color\nWelcome-channel\nWelcome-enable/diable\nTest-welcome\nPrefix <new "
                                        f"prefix>```",
                            color=0xffb6c1)
+
+MusicHelp = discord.Embed(title="Music Page",
+                          description=f"***<Required>*** | ***[Optional]***\n**Commands:**\nUpdate Still in progress\n\n```Play "
+                                      f"<song>\nPause\nResume\nLyrics <Song>\nQueue\nJoin```",
+                          color=color)
