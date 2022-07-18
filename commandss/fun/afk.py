@@ -47,7 +47,7 @@ class Fun(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command()
-    async def criminal(self, ctx, user: discord.Member = None):
+    async def wanted(self, ctx, user: discord.Member = None):
         if mycol.find_one({"key": f"accepted_{ctx.author.id}"}) is None:
             await ctx.send(warning)
             return

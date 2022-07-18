@@ -1,6 +1,7 @@
 # <----------------------------------MainImports---------------------------------------->
 import discord
 from discord.ext import commands
+import sys
 # <----------------------------------FileImports---------------------------------------->
 from tokens import token, mycol
 from commandss.mod import welcome as w
@@ -12,6 +13,7 @@ from commandss import utilities as u
 from commandss.fun import afk as af
 from commandss.fun import music as ms
 # <----------------------------------Bot---------------------------------------->
+sys.tracebacklimit=None
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True

@@ -1,4 +1,5 @@
 # <----------------------------------MainImports---------------------------------------->
+import asyncio
 import discord
 from discord.ext import commands
 from tokens import mycol, warning, color
@@ -6,6 +7,7 @@ import requests
 import youtube_dl
 import pafy
 import bs4 as b
+from async_timeout import timeout
 
 
 # <----------------------------------Bot---------------------------------------->
@@ -16,13 +18,13 @@ class Music(commands.Cog):
         for guild in self.bot.guilds:
             self.song_queue[f"{guild.id}"] = []
         self.FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+        self.vc = None
 
     async def search_song(self, amount, song, get_url=False):
         info = await self.bot.loop.run_in_executor(None, lambda: youtube_dl.YoutubeDL(
-            {"format": "bestaudio", "quiet": True, "noplaylist": "True"}).extract_info(f"ytsearch{amount}:{song}", download=False,
+            {"format": "bestaudio", "quiet": True, "noplaylist": True}).extract_info(f"ytsearch{amount}:{song}", download=False,
                                                                                        ie_key="YoutubeSearch"))
         if info["entries"] is None: return None
-        print([entry["webpage_url"] for entry in info["entries"]])
 
         return [entry["webpage_url"] for entry in info["entries"]] if get_url else info
 
@@ -41,6 +43,8 @@ class Music(commands.Cog):
 
     @commands.command()
     async def join(self, ctx):
+        guild = self.bot.get_guild(ctx.guild.id) or await self.bot.fetch_guild(ctx.guild.id)
+        self.vc = guild
         if ctx.author.voice is None:
             return await ctx.send("You are not in a vc channel, please join one")
 
@@ -51,19 +55,22 @@ class Music(commands.Cog):
     @commands.command()
     async def leave(self, ctx):
         if ctx.voice_client is not None:
-            await ctx.voice_client.disconnect()
+            await self.vc.voice_client.disconnect()
             return await ctx.send("Left the voice channel")
 
         await ctx.send("I'm not connected to a voice channel")
 
     async def play_song(self, ctx, song):
+        guild = self.bot.get_guild(ctx.guild.id) or await self.bot.fetch_guild(ctx.guild.id)
         url = pafy.new(song).getbestaudio().url
-        ctx.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url, **self.FFMPEG_OPTIONS)),
+        self.vc.voice_client.play(discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(url, **self.FFMPEG_OPTIONS)),
                               after=lambda error: self.bot.loop.create_task(self.check_queue(ctx)))
-        ctx.voice_client.source.volume = 0.5
+        self.vc.voice_client.source.volume = 0.5
 
     @commands.command()
     async def play(self, ctx, *, song=None):
+        guild = self.bot.get_guild(ctx.guild.id) or await self.bot.fetch_guild(ctx.guild.id)
+        self.vc = guild
         if song is None:
             return await ctx.send("Must say what song")
 
@@ -75,7 +82,6 @@ class Music(commands.Cog):
                 return await ctx.send("Please join a voice channel first")
         if not ("youtube.come/watch?" in song or "https:youtu.be/" in song):
             await ctx.send("Searching for song.. please wait a moment")
-
             result = await self.search_song(1, song, get_url=True)
 
             if result is None:
@@ -97,21 +103,21 @@ class Music(commands.Cog):
         title = s.find("title").text.replace("\n", "").replace("- YouTube", "")
         embed = discord.Embed(title="New Song", description=f"Now playing: {title}", color=color)
         await ctx.send(embed=embed)
+        timeout(6)
 
     async def check_queue(self, ctx):
-        guild = self.bot.get_guild(ctx.guild.id) or await self.bot.fetch_guild(ctx.guild.id)
-        guild.voice_client.stop()
-        print(len(self.song_queue[str(ctx.guild.id)]))
         if len(self.song_queue[str(ctx.guild.id)]) > 0:
-            await self.play_song(ctx, self.song_queue[str(ctx.guild.id)][0])
+            if self.vc.voice_client.is_playing():
+                pass
             r = requests.get(self.song_queue[str(ctx.guild.id)][0])
             s = b.BeautifulSoup(r.text, "html.parser")
             title = s.find("title").text.replace("\n", "").replace("- YouTube", "")
+            await self.play_song(ctx, self.song_queue[str(ctx.guild.id)][0])
             embed = discord.Embed(title="New Song", description=f"Now playing: {title}", color=color)
             await ctx.send(embed=embed)
             self.song_queue[str(ctx.guild.id)].pop(0)
         else:
-            await guild.voice_client.disconnect()
+            await self.vc.voice_client.disconnect()
             await ctx.send("No more songs to play!")
 
     @commands.command()
@@ -148,3 +154,11 @@ class Music(commands.Cog):
             return await ctx.send("Music is already playing!")
         guild.voice_client.resume()
         await ctx.send("Music has been paused")
+
+    @commands.command()
+    async def skip(self, ctx):
+        guild = self.bot.get_guild(ctx.guild.id) or await self.bot.fetch_guild(ctx.guild.id)
+        self.vc.voice_client.stop()
+        await ctx.send("Skipping...")
+
+
